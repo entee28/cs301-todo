@@ -1,8 +1,9 @@
 {
-  "extends": "tsconfig/nextjs.json",
+  "extends": "tsconfig/vite.json",
   "compilerOptions": {
-    "plugins": [{ "name": "next" }]
+    "plugins": [{ "name": "vite" }]
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
+  "references": [{ "path": "./tsconfig.node.json" }],
+  "include": ["src"],
   "exclude": ["node_modules"]
 }
