@@ -7,16 +7,17 @@ export const appSlice = createSlice({
   initialState: {
     token: null,
     userId: null,
+    tasks: [],
   } as AppSliceState,
   reducers: {
     updateAppData: (state, action: PayloadAction<Partial<AppSliceState>>) => {
       return merge(state, action.payload);
     },
     clearUser: () => {
-      console.log("isCalled");
       return {
         token: null,
         userId: null,
+        tasks: [],
       };
     },
   },

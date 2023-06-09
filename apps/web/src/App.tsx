@@ -11,6 +11,7 @@ import { useAppDispatch, useAppSelector } from "./libs/redux";
 import { updateAppData } from "./libs/redux/appSlice";
 import { Login, Main } from "./pages";
 import { getToken } from "./libs/utils";
+import jwtDecode from "jwt-decode";
 
 function App() {
   const { token } = useAppSelector((state) => state.app);
@@ -35,7 +36,10 @@ function App() {
       } else {
         const data = await getToken(authCode);
         if (data.access_token) {
-          dispatch(updateAppData({ token: data.access_token }));
+          const userData: any = jwtDecode(data.access_token);
+          dispatch(
+            updateAppData({ token: data.access_token, userId: userData.sub })
+          );
           return null;
         } else {
           return redirect("/login");

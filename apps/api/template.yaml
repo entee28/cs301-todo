@@ -14,72 +14,100 @@ Transform:
 # Resources declares the AWS resources that you want to include in the stack
 # https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/resources-section-structure.html
 Resources:
-  TodoAPI:
-    Type: AWS::ApiGatewayV2::Api
-    Properties:
-      Name: TodoAPI
-      ProtocolType: HTTP
-
-  TodoAPIAuthorizer:
-    Type: AWS::ApiGatewayV2::Authorizer
-    Properties:
-      ApiId: !Ref TodoAPI
-      AuthorizerType: JWT
-      IdentitySource:
-        - $request.header.Authorization
-      JwtConfiguration:
-        Audience:
-          - !Ref TodoAPI
-        Issuer: !Sub https://cognito-idp.${AWS::Region}.amazonaws.com/ap-southeast-1_bm1XWhtv2
-      Name: TodoAPIAuthorizer
-
   # Each Lambda function is defined by properties:
   # https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
 
-  HelloRoute:
-    Type: AWS::ApiGatewayV2::Route
-    Properties:
-      ApiId: !Ref TodoAPI
-      RouteKey: GET /hello
-      AuthorizationType: JWT
-      Target: !Join
-        - "/"
-        - - "integrations"
-          - !Ref HelloInteg
-      AuthorizerId: !Ref TodoAPIAuthorizer
-
-  HelloInteg:
-    Type: AWS::ApiGatewayV2::Integration
-    Properties:
-      ApiId: !Ref TodoAPI
-      Description: Hello route integration
-      IntegrationType: AWS_PROXY
-      PayloadFormatVersion: 2.0
-      IntegrationUri:
-        Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${helloFunction.Arn}/invocations
-
-  helloFunction:
+  getAllTasksByUserIdFunction:
     Type: AWS::Serverless::Function
     Properties:
-      Handler: dist/hello.hello
+      Handler: src/handlers/getAllTasksByUserId.getAllItemsByUserIdHandler
       Runtime: nodejs18.x
       Architectures:
         - x86_64
       MemorySize: 128
       Timeout: 100
-      Description: Hello World
+      Description: Get all tasks in DynamoDB
       Environment:
         Variables:
-          APIGW_ENDPOINT: !Sub "https://${TodoAPI}.execute-api.${AWS::Region}.amazonaws.com/Prod"
+          TABLE_NAME: !Ref TodoTasks
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref TodoTasks
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /tasks/{userId}
+            Method: GET
 
-  HelloPermission:
-    Type: AWS::Lambda::Permission
+  putTaskFunction:
+    Type: AWS::Serverless::Function
     Properties:
-      Action: lambda:InvokeFunction
-      FunctionName: !Ref helloFunction
-      Principal: apigateway.amazonaws.com
-    DependsOn:
-      - TodoAPI
+      Handler: src/handlers/putTask.createTaskHandler
+      Runtime: nodejs18.x
+      Architectures:
+        - x86_64
+      MemorySize: 128
+      Timeout: 100
+      Description: Add one task to a DynamoDB table.
+      Environment:
+        Variables:
+          TABLE_NAME: !Ref TodoTasks
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref TodoTasks
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /task
+            Method: POST
+
+  deleteTaskFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: src/handlers/deleteTask.deleteTaskHandler
+      Runtime: nodejs18.x
+      Architectures:
+        - x86_64
+      MemorySize: 128
+      Timeout: 100
+      Description: Delete task from a DynamoDB table.
+      Environment:
+        Variables:
+          TABLE_NAME: !Ref TodoTasks
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref TodoTasks
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /task
+            Method: DELETE
+
+  getTaskByIdFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: src/handlers/getTaskById.getByIdHandler
+      Runtime: nodejs18.x
+      Architectures:
+        - x86_64
+      MemorySize: 128
+      Timeout: 100
+      Description: Get task by id in DynamoDB
+      Environment:
+        Variables:
+          TABLE_NAME: !Ref TodoTasks
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref TodoTasks
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /task/{id}
+            Method: GET
 
   TodoTaskGroups:
     Type: AWS::Serverless::SimpleTable
@@ -103,106 +131,7 @@ Resources:
         ReadCapacityUnits: 1
         WriteCapacityUnits: 1
 
-  Deployment:
-    Type: AWS::ApiGatewayV2::Deployment
-    DependsOn:
-      - HelloRoute
-    Properties:
-      ApiId: !Ref TodoAPI
-
-  Stage:
-    Type: AWS::ApiGatewayV2::Stage
-    Properties:
-      StageName: Prod
-      Description: Prod Stage
-      DeploymentId: !Ref Deployment
-      ApiId: !Ref TodoAPI
-
 Outputs:
   WebEndpoint:
     Description: "API Gateway endpoint URL for Prod stage"
-    Value: !Sub "https://${TodoAPI}.execute-api.${AWS::Region}.amazonaws.com/Prod/"
-
-  # # This is a Lambda function config associated with the source code: get-all-items.js
-  # getAllItemsFunction:
-  #   Type: AWS::Serverless::Function
-  #   Properties:
-  #     Handler: src/handlers/get-all-items.getAllItemsHandler
-  #     Runtime: nodejs18.x
-  #     Architectures:
-  #       - x86_64
-  #     MemorySize: 128
-  #     Timeout: 100
-  #     Description: A simple example includes a HTTP get method to get all items from a DynamoDB table.
-  #     Policies:
-  #       # Give Create/Read/Update/Delete Permissions to the SampleTable
-  #       - DynamoDBCrudPolicy:
-  #           TableName: !Ref SampleTable
-  #     Environment:
-  #       Variables:
-  #         # Make table name accessible as environment variable from function code during execution
-  #         SAMPLE_TABLE: !Ref SampleTable
-  #     Events:
-  #       Api:
-  #         Type: Api
-  #         Properties:
-  #           Path: /
-  #           Method: GET
-  # # Each Lambda function is defined by properties:
-  # # https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
-
-  # # This is a Lambda function config associated with the source code: get-by-id.js
-  # getByIdFunction:
-  #   Type: AWS::Serverless::Function
-  #   Properties:
-  #     Handler: src/handlers/get-by-id.getByIdHandler
-  #     Runtime: nodejs18.x
-  #     Architectures:
-  #       - x86_64
-  #     MemorySize: 128
-  #     Timeout: 100
-  #     Description: A simple example includes a HTTP get method to get one item by id from a DynamoDB table.
-  #     Policies:
-  #       # Give Create/Read/Update/Delete Permissions to the SampleTable
-  #       - DynamoDBCrudPolicy:
-  #           TableName: !Ref SampleTable
-  #     Environment:
-  #       Variables:
-  #         # Make table name accessible as environment variable from function code during execution
-  #         SAMPLE_TABLE: !Ref SampleTable
-  #     Events:
-  #       Api:
-  #         Type: Api
-  #         Properties:
-  #           Path: /{id}
-  #           Method: GET
-  # # Each Lambda function is defined by properties:
-  # # https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
-
-  # # This is a Lambda function config associated with the source code: put-item.js
-  # putItemFunction:
-  #   Type: AWS::Serverless::Function
-  #   Properties:
-  #     Handler: src/handlers/put-item.putItemHandler
-  #     Runtime: nodejs18.x
-  #     Architectures:
-  #       - x86_64
-  #     MemorySize: 128
-  #     Timeout: 100
-  #     Description: A simple example includes a HTTP post method to add one item to a DynamoDB table.
-  #     Policies:
-  #       # Give Create/Read/Update/Delete Permissions to the SampleTable
-  #       - DynamoDBCrudPolicy:
-  #           TableName: !Ref SampleTable
-  #     Environment:
-  #       Variables:
-  #         # Make table name accessible as environment variable from function code during execution
-  #         SAMPLE_TABLE: !Ref SampleTable
-  #     Events:
-  #       Api:
-  #         Type: Api
-  #         Properties:
-  #           Path: /
-  #           Method: POST
-  # # Simple syntax to create a DynamoDB table with a single attribute primary key, more in
-  # # https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlesssimpletable
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/"
