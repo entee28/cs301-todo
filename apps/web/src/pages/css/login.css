@@ -1,0 +1,22 @@
+.login-banner {
+    background-color: dimgray;
+    border-radius: 25px;
+    padding: 2rem;
+}
+
+.logo-todo{
+    padding: 6rem 5rem 2rem 5rem;
+    border-radius: 25px;
+}
+
+.logo-text {
+    left: 25px;
+    top: 20px;
+    user-select: none;
+}
+
+@media (min-width: 1200px) {
+    .logo-todo{
+        padding: 7rem;
+    }
+}

@@ -1,0 +1,54 @@
+.navbar-wrap{
+    height: 80vh;
+    border-radius: 25px;
+}
+
+.navbar-body-wrap{
+    display: block !important;
+}
+
+.hr-html{
+    color: inherit;
+    border: 0;
+    border-top: 1px solid;
+    opacity: .25;
+}
+
+.nav-pills .nav-link.active {
+    background-color: #729ac3;
+}
+
+.page-content .modal .modal-body input{
+    color: black;
+    border-color: transparent;
+    border-radius: 10px;
+}
+
+.page-content .modal .modal-body input:focus-visible{
+    outline: transparent;
+}
+
+.task-list{
+    list-style: "none";
+    max-height: 61vh;
+}
+
+.delete-task-btn{
+    width: 54px;
+    height: 54px;
+}
+
+.delete-task-btn.dropdown-toggle::after{
+    margin: 0;
+    border: none;
+}
+
+@media (max-width: 767px){
+    .navbar-body-wrap{
+        display: inherit !important;
+    }
+
+    .navbar-wrap{
+        height: auto;
+    }
+}
