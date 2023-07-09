@@ -24,6 +24,7 @@ export const Main = () => {
   });
 
   const deleteTask = trpc.deleteTask.useMutation();
+  const deleteTaskGroup = trpc.deleteTaskGroup.useMutation();
 
   const [taskName, setTaskName] = useState("");
   const [taskNote, setTaskNote] = useState("");
@@ -47,10 +48,22 @@ export const Main = () => {
     }
   }, [fetchedTasks]);
 
-  const deleteHandler = (id: string) => {
+  const deleteTaskHandler = (id: string) => {
     deleteTask
       .mutateAsync({ _id: id })
       .then(() => fetchedTasks.refetch())
+      .catch((err) => {
+        console.error(err);
+      });
+  };
+
+  const deleteTaskGroupHandler = () => {
+    deleteTaskGroup
+      .mutateAsync({ _id: currentlySelectedGroup?._id || "" })
+      .then(() => {
+        dispatch(updateAppData({ currentlySelectedGroup: null }));
+        fetchedGroups.refetch();
+      })
       .catch((err) => {
         console.error(err);
       });
@@ -173,7 +186,25 @@ export const Main = () => {
 
         {/* page-content start */}
         <div className="page-content ps-4 pe-3 col-md-9">
-          <h1 className="text-white my-4 mt-md-0">Task</h1>
+          <h1 className="text-white my-4 mt-md-0">
+            {currentlySelectedGroup ? currentlySelectedGroup.name : "All Task"}
+          </h1>
+          {currentlySelectedGroup && (
+            <>
+              <button
+                data-bs-toggle="modal"
+                data-bs-target="#addTaskGroupModal"
+                onClick={() => {
+                  setGroupId(currentlySelectedGroup._id);
+                  setGroupName(currentlySelectedGroup.name);
+                }}
+              >
+                Edit Group
+              </button>
+              <button onClick={deleteTaskGroupHandler}>Delete Group</button>
+            </>
+          )}
+
           {/* Button trigger modal */}
           <button
             type="button"
@@ -263,7 +294,7 @@ export const Main = () => {
                             data-bs-target="#addTaskModal"
                             onClick={() => {
                               setTaskName(task.name);
-                              setTaskNote(task.note);
+                              setTaskNote(task.note || "");
                               setTaskId(task._id);
                             }}
                           >
@@ -273,7 +304,7 @@ export const Main = () => {
                         <li>
                           <button
                             className="btn btn-danger dropdown-item text-danger"
-                            onClick={() => deleteHandler(task._id)}
+                            onClick={() => deleteTaskHandler(task._id)}
                           >
                             <i className="fa-regular fa-trash-can"></i> Delete
                           </button>

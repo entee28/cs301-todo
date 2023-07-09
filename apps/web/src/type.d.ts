@@ -10,7 +10,7 @@ type Task = {
   completed: boolean;
   important: boolean;
   name: string;
-  note: string;
+  note?: string;
   _id: string;
   userId: string;
   groupId?: string;

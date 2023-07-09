@@ -1,4 +1,5 @@
-import { useAppSelector } from "../libs/redux";
+import { useAppDispatch, useAppSelector } from "../libs/redux";
+import { updateAppData } from "../libs/redux/appSlice";
 import { trpc } from "../libs/utils";
 
 type Props = {
@@ -15,6 +16,8 @@ export const TaskGroupModal = ({
   refetch,
 }: Props) => {
   const { userId } = useAppSelector((state) => state.app);
+  const dispatch = useAppDispatch();
+
   const createTaskGroup = trpc.addTaskGroup.useMutation();
   const updateTaskGroup = trpc.updateTaskGroup.useMutation();
 
@@ -28,6 +31,15 @@ export const TaskGroupModal = ({
           name: groupName,
         })
         .then(() => {
+          dispatch(
+            updateAppData({
+              currentlySelectedGroup: {
+                _id: groupId,
+                name: groupName,
+                userId,
+              },
+            })
+          );
           refetch();
         })
         .catch((err) => {
