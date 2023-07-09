@@ -4,14 +4,14 @@ export class TaskClass {
   @prop({ required: true })
   public name!: string;
 
-  @prop()
+  @prop({ default: "" })
   public note?: string;
 
-  @prop({ default: false })
-  public completed?: boolean;
+  @prop({ required: true })
+  public completed!: boolean;
 
-  @prop({ default: false })
-  public important?: boolean;
+  @prop({ required: true })
+  public important!: boolean;
 
   @prop({ required: true })
   public userId!: string;

@@ -22,42 +22,31 @@ export const appRouter = router({
     .input(
       z.object({
         userId: z.string().nonempty(),
-        groupId: z.string().optional(),
       })
     )
-    .query(
-      async ({ input }): Promise<SchemaReturnType<TaskClass>[] | string> => {
-        const { userId, groupId } = input;
+    .query(async ({ input }): Promise<SchemaReturnType<TaskClass>[]> => {
+      const { userId } = input;
 
-        if (groupId) {
-          const group = await TaskGroup.findById(groupId);
-          if (!group) {
-            return "Invalid groupId";
-          }
-        }
+      const tasks = await Task.find({
+        userId,
+      });
 
-        const tasks = await Task.find({
-          userId,
-          groupId,
+      let result: SchemaReturnType<TaskClass>[] = [];
+
+      tasks.forEach((task) => {
+        result.push({
+          _id: task._id.toString(),
+          name: task.name,
+          note: task.note,
+          completed: task.completed,
+          important: task.important,
+          userId: task.userId,
+          groupId: task.groupId,
         });
+      });
 
-        let result: SchemaReturnType<TaskClass>[] = [];
-
-        tasks.forEach((task) => {
-          result.push({
-            _id: task._id.toString(),
-            name: task.name,
-            note: task.note,
-            completed: task.completed,
-            important: task.important,
-            userId: task.userId,
-            groupId: task.groupId,
-          });
-        });
-
-        return result;
-      }
-    ),
+      return result;
+    }),
   addTask: publicProcedure
     .input(taskInput)
     .mutation(async ({ input }): Promise<SchemaReturnType<TaskClass>> => {
@@ -65,9 +54,9 @@ export const appRouter = router({
 
       const task = new Task({
         name,
-        note,
-        completed,
-        important,
+        note: note || "",
+        completed: completed || false,
+        important: important || false,
         userId,
         groupId,
       });
@@ -91,37 +80,35 @@ export const appRouter = router({
         task: taskInput,
       })
     )
-    .mutation(
-      async ({ input }): Promise<SchemaReturnType<TaskClass> | string> => {
-        const { _id, task } = input;
-        const { name, note, completed, important, userId, groupId } = task;
+    .mutation(async ({ input }): Promise<SchemaReturnType<TaskClass>> => {
+      const { _id, task } = input;
+      const { name, note, completed, important, userId, groupId } = task;
 
-        const foundTask = await Task.findById(_id);
+      const foundTask = await Task.findById(_id);
 
-        if (!foundTask) {
-          return "Invalid _id";
-        }
-
-        foundTask.name = name;
-        foundTask.note = note;
-        foundTask.completed = completed;
-        foundTask.important = important;
-        foundTask.userId = userId;
-        foundTask.groupId = groupId;
-
-        await foundTask.save();
-
-        return {
-          _id: foundTask._id.toString(),
-          name: foundTask.name,
-          note: foundTask.note,
-          completed: foundTask.completed,
-          important: foundTask.important,
-          userId: foundTask.userId,
-          groupId: foundTask.groupId,
-        };
+      if (!foundTask) {
+        throw new Error("Invalid _id");
       }
-    ),
+
+      foundTask.name = name;
+      foundTask.note = note || "";
+      foundTask.completed = completed || false;
+      foundTask.important = important || false;
+      foundTask.userId = userId;
+      foundTask.groupId = groupId;
+
+      await foundTask.save();
+
+      return {
+        _id: foundTask._id.toString(),
+        name: foundTask.name,
+        note: foundTask.note,
+        completed: foundTask.completed,
+        important: foundTask.important,
+        userId: foundTask.userId,
+        groupId: foundTask.groupId,
+      };
+    }),
   deleteTask: publicProcedure
     .input(
       z.object({
@@ -139,29 +126,25 @@ export const appRouter = router({
         userId: z.string().nonempty(),
       })
     )
-    .query(
-      async ({
-        input,
-      }): Promise<SchemaReturnType<TaskGroupClass>[] | string> => {
-        const { userId } = input;
+    .query(async ({ input }): Promise<SchemaReturnType<TaskGroupClass>[]> => {
+      const { userId } = input;
 
-        const groups = await TaskGroup.find({
-          userId,
+      const groups = await TaskGroup.find({
+        userId,
+      });
+
+      let result: SchemaReturnType<TaskGroupClass>[] = [];
+
+      groups.forEach((group) => {
+        result.push({
+          _id: group._id.toString(),
+          name: group.name,
+          userId: group.userId,
         });
+      });
 
-        let result: SchemaReturnType<TaskGroupClass>[] = [];
-
-        groups.forEach((group) => {
-          result.push({
-            _id: group._id.toString(),
-            name: group.name,
-            userId: group.userId,
-          });
-        });
-
-        return result;
-      }
-    ),
+      return result;
+    }),
   addTaskGroup: publicProcedure
     .input(
       z.object({
@@ -192,27 +175,25 @@ export const appRouter = router({
         name: z.string().nonempty(),
       })
     )
-    .mutation(
-      async ({ input }): Promise<SchemaReturnType<TaskGroupClass> | string> => {
-        const { _id, name } = input;
+    .mutation(async ({ input }): Promise<SchemaReturnType<TaskGroupClass>> => {
+      const { _id, name } = input;
 
-        const foundGroup = await TaskGroup.findById(_id);
+      const foundGroup = await TaskGroup.findById(_id);
 
-        if (!foundGroup) {
-          return "Invalid _id";
-        }
-
-        foundGroup.name = name;
-
-        await foundGroup.save();
-
-        return {
-          _id: foundGroup._id.toString(),
-          name: foundGroup.name,
-          userId: foundGroup.userId,
-        };
+      if (!foundGroup) {
+        throw new Error("Invalid _id");
       }
-    ),
+
+      foundGroup.name = name;
+
+      await foundGroup.save();
+
+      return {
+        _id: foundGroup._id.toString(),
+        name: foundGroup.name,
+        userId: foundGroup.userId,
+      };
+    }),
   deleteTaskGroup: publicProcedure
     .input(
       z.object({
