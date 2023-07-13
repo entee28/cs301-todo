@@ -73,7 +73,7 @@ export const Main = () => {
     <>
       <div className="row flex-wrap px-4 m-0">
         {/* menu-sidebar start */}
-        <div className="navbar-wrap d-flex flex-column px-3 bg-dark-subtle col-md-3">
+        <div className="navbar-wrap d-flex flex-column px-md-3 bg-dark-subtle col-md-3">
           <nav className="navbar navbar-expand-md p-0 mt-3">
             <div className="navbar-body-wrap container-fluid">
               <a className="navbar-brand fs-2 pb m-0" href="#">
@@ -94,14 +94,13 @@ export const Main = () => {
               </button>
 
               <div className="collapse navbar-collapse" id="navbarNavDropdown">
-                <ul className="navbar-nav nav nav-pills flex-column mb-auto">
-                  <div className="hr-html my-3" /> {/* hr */}
+                <ul className="navbar-nav nav nav-pills flex-column mb-auto w-100">
+                  <div className="hr-html mt-3 mb-2" /> {/* hr */}
                   {/* task start */}
-                  <h4 className="task">Task</h4>
                   <li className="nav-item">
                     <a
                       className={`nav-link ${
-                        !currentlySelectedGroup && "active"
+                        !currentlySelectedGroup && "active fw-bold"
                       }`}
                       aria-current="page"
                       href="#"
@@ -111,27 +110,46 @@ export const Main = () => {
                         );
                       }}
                     >
-                      <i className="fa-solid fa-angles-right me-2"></i>All tasks
+                      <i className="fa-solid fa-list-check me-2"></i>All tasks
                     </a>
                   </li>
-                  {groups.map((group) => (
-                    <li className="nav-item">
-                      <a
-                        className={`nav-link ${
-                          currentlySelectedGroup?._id === group._id && "active"
-                        }`}
-                        href="#"
-                        onClick={() => {
-                          dispatch(
-                            updateAppData({ currentlySelectedGroup: group })
-                          );
-                        }}
-                      >
-                        <i className="fa-solid fa-angles-right me-2"></i>
-                        {group.name}
-                      </a>
-                    </li>
-                  ))}
+
+                  <h5 className="task mt-2">Group Task</h5>
+                  <ul className="list-unstyled px-3 overflow-y-auto" style={{maxHeight: "35vh"}}>
+                    {groups.map((group) => (
+                      <li key={group._id} className="nav-item">
+                        <a
+                          className={`nav-link text-limit group-task-item ${
+                            currentlySelectedGroup?._id === group._id && "active fw-bold"
+                          }`}
+                          href="#"
+                          onClick={() => {
+                            dispatch(
+                              updateAppData({ currentlySelectedGroup: group })
+                            );
+                          }}
+              
+                        >
+                          {currentlySelectedGroup?._id === group._id && <i className="fa-solid fa-angles-right me-2"></i> }
+                          {group.name}
+                        </a>
+                      </li>
+                    ))}
+                  </ul>
+                  <button
+                    type="button"
+                    className="btn btn-outline-success add-task-group-btn w-100 p-2 mt-2"
+                    data-bs-toggle="modal"
+                    data-bs-target="#addTaskGroupModal"
+                    onClick={() => {
+                      setGroupId("");
+                      setGroupName("");
+                    }}
+                  >
+                    <p className="my-1 mx-0 text-start">
+                      <i className="fa-solid fa-plus me-2"></i> Create task group
+                    </p>
+                  </button>
                   {/* <li className="nav-item">
                     <a className="nav-link" href="#">
                       <i className="fa-solid fa-list-check me-2"></i>Today
@@ -186,24 +204,28 @@ export const Main = () => {
 
         {/* page-content start */}
         <div className="page-content ps-4 pe-3 col-md-9">
-          <h1 className="text-white my-4 mt-md-0">
-            {currentlySelectedGroup ? currentlySelectedGroup.name : "All Task"}
-          </h1>
-          {currentlySelectedGroup && (
-            <>
-              <button
-                data-bs-toggle="modal"
-                data-bs-target="#addTaskGroupModal"
-                onClick={() => {
-                  setGroupId(currentlySelectedGroup._id);
-                  setGroupName(currentlySelectedGroup.name);
-                }}
-              >
-                Edit Group
-              </button>
-              <button onClick={deleteTaskGroupHandler}>Delete Group</button>
-            </>
-          )}
+          <div className="d-flex align-items-center justify-content-between">
+            <h1 className="text-white my-4 mt-md-0">
+              {currentlySelectedGroup ? currentlySelectedGroup.name : "All Task"}
+            </h1>
+            {currentlySelectedGroup && (
+              <div className="p-3">
+                <button
+                  className="btn btn-outline-primary me-2 mb-2"
+                  data-bs-toggle="modal"
+                  data-bs-target="#addTaskGroupModal"
+                  onClick={() => {
+                    setGroupId(currentlySelectedGroup._id);
+                    setGroupName(currentlySelectedGroup.name);
+                  }}
+                >
+                  <i className="fa-regular fa-pen-to-square"></i>
+                </button>
+                <button className="btn btn-outline-danger mb-2" onClick={deleteTaskGroupHandler}><i className="fa-solid fa-trash"></i></button>
+              </div>
+            )}
+
+          </div>
 
           {/* Button trigger modal */}
           <button
@@ -221,20 +243,7 @@ export const Main = () => {
               <i className="fa-solid fa-plus me-2"></i> Add new task
             </p>
           </button>
-          <button
-            type="button"
-            className="btn btn-outline-secondary w-100 mb-3"
-            data-bs-toggle="modal"
-            data-bs-target="#addTaskGroupModal"
-            onClick={() => {
-              setGroupId("");
-              setGroupName("");
-            }}
-          >
-            <p className="my-1 mx-0 text-start">
-              <i className="fa-solid fa-plus me-2"></i> Create task group
-            </p>
-          </button>
+          
 
           {/* add task modal start */}
           <TaskModal

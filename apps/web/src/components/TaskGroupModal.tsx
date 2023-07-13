@@ -82,7 +82,7 @@ export const TaskGroupModal = ({
               aria-label="Close"
             ></button>
           </div>
-          <div className="modal-body px-3 align-self-center">
+          <div className="modal-body px-3">
             <label htmlFor="taskName">Group Name:</label>
             <br />
             <input
