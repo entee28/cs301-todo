@@ -14,6 +14,8 @@ type Task = {
   _id: string;
   userId: string;
   groupId?: string;
+  createdAt?: string;
+  updatedAt?: string;
 };
 
 type Group = {

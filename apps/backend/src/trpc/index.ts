@@ -42,6 +42,8 @@ export const appRouter = router({
           important: task.important,
           userId: task.userId,
           groupId: task.groupId,
+          createdAt: task.createdAt,
+          updatedAt: task.updatedAt,
         });
       });
 
@@ -71,6 +73,8 @@ export const appRouter = router({
         important: task.important,
         userId: task.userId,
         groupId: task.groupId,
+        createdAt: task.createdAt,
+        updatedAt: task.updatedAt,
       };
     }),
   updateTask: publicProcedure

@@ -1,6 +1,7 @@
 import { getModelForClass, prop } from "@typegoose/typegoose";
+import { TimeStamps } from "@typegoose/typegoose/lib/defaultClasses";
 
-export class TaskClass {
+export class TaskClass extends TimeStamps {
   @prop({ required: true })
   public name!: string;
 
