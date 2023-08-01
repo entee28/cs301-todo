@@ -17,6 +17,15 @@ const taskInput = z.object({
   groupId: z.string().optional(),
 });
 
+const updateTaskInput = z.object({
+  name: z.string().optional(),
+  note: z.string().optional(),
+  completed: z.boolean().optional(),
+  important: z.boolean().optional(),
+  userId: z.string().optional(),
+  groupId: z.string().optional(),
+});
+
 export const appRouter = router({
   getTasks: publicProcedure
     .input(
@@ -81,12 +90,12 @@ export const appRouter = router({
     .input(
       z.object({
         _id: z.string().nonempty(),
-        task: taskInput,
+        task: updateTaskInput,
       })
     )
     .mutation(async ({ input }): Promise<SchemaReturnType<TaskClass>> => {
       const { _id, task } = input;
-      const { name, note, completed, important, userId, groupId } = task;
+      const { name, note, completed, important, groupId } = task;
 
       const foundTask = await Task.findById(_id);
 
@@ -94,11 +103,10 @@ export const appRouter = router({
         throw new Error("Invalid _id");
       }
 
-      foundTask.name = name;
-      foundTask.note = note || "";
-      foundTask.completed = completed || false;
-      foundTask.important = important || false;
-      foundTask.userId = userId;
+      foundTask.name = name || foundTask.name;
+      foundTask.note = note || foundTask.note;
+      foundTask.completed = completed ?? foundTask.completed;
+      foundTask.important = important ?? foundTask.important;
       foundTask.groupId = groupId;
 
       await foundTask.save();

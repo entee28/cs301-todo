@@ -25,6 +25,7 @@ export const Main = () => {
 
   const deleteTask = trpc.deleteTask.useMutation();
   const deleteTaskGroup = trpc.deleteTaskGroup.useMutation();
+  const updateTask = trpc.updateTask.useMutation();
 
   const [taskName, setTaskName] = useState("");
   const [taskNote, setTaskNote] = useState("");
@@ -113,14 +114,17 @@ export const Main = () => {
                       <i className="fa-solid fa-list-check me-2"></i>All tasks
                     </a>
                   </li>
-
                   <h5 className="task mt-2">Group Task</h5>
-                  <ul className="list-unstyled px-3 overflow-y-auto" style={{maxHeight: "35vh"}}>
+                  <ul
+                    className="list-unstyled px-3 overflow-y-auto"
+                    style={{ maxHeight: "35vh" }}
+                  >
                     {groups.map((group) => (
                       <li key={group._id} className="nav-item">
                         <a
                           className={`nav-link text-limit group-task-item ${
-                            currentlySelectedGroup?._id === group._id && "active fw-bold"
+                            currentlySelectedGroup?._id === group._id &&
+                            "active fw-bold"
                           }`}
                           href="#"
                           onClick={() => {
@@ -128,9 +132,10 @@ export const Main = () => {
                               updateAppData({ currentlySelectedGroup: group })
                             );
                           }}
-              
                         >
-                          {currentlySelectedGroup?._id === group._id && <i className="fa-solid fa-angles-right me-2"></i> }
+                          {currentlySelectedGroup?._id === group._id && (
+                            <i className="fa-solid fa-angles-right me-2"></i>
+                          )}
                           {group.name}
                         </a>
                       </li>
@@ -147,7 +152,8 @@ export const Main = () => {
                     }}
                   >
                     <p className="my-1 mx-0 text-start">
-                      <i className="fa-solid fa-plus me-2"></i> Create task group
+                      <i className="fa-solid fa-plus me-2"></i> Create task
+                      group
                     </p>
                   </button>
                   {/* <li className="nav-item">
@@ -206,7 +212,9 @@ export const Main = () => {
         <div className="page-content ps-4 pe-3 col-md-9">
           <div className="d-flex align-items-center justify-content-between">
             <h1 className="text-white my-4 mt-md-0">
-              {currentlySelectedGroup ? currentlySelectedGroup.name : "All Task"}
+              {currentlySelectedGroup
+                ? currentlySelectedGroup.name
+                : "All Task"}
             </h1>
             {currentlySelectedGroup && (
               <div className="p-3">
@@ -221,10 +229,14 @@ export const Main = () => {
                 >
                   <i className="fa-regular fa-pen-to-square"></i>
                 </button>
-                <button className="btn btn-outline-danger mb-2" onClick={deleteTaskGroupHandler}><i className="fa-solid fa-trash"></i></button>
+                <button
+                  className="btn btn-outline-danger mb-2"
+                  onClick={deleteTaskGroupHandler}
+                >
+                  <i className="fa-solid fa-trash"></i>
+                </button>
               </div>
             )}
-
           </div>
 
           {/* Button trigger modal */}
@@ -243,7 +255,6 @@ export const Main = () => {
               <i className="fa-solid fa-plus me-2"></i> Add new task
             </p>
           </button>
-          
 
           {/* add task modal start */}
           <TaskModal
@@ -271,6 +282,19 @@ export const Main = () => {
                     type="checkbox"
                     id={task._id}
                     value={task._id}
+                    checked={task.completed}
+                    onChange={() => {
+                      updateTask
+                        .mutateAsync({
+                          _id: task._id,
+                          task: {
+                            completed: !task.completed,
+                          },
+                        })
+                        .then(() => {
+                          fetchedTasks.refetch();
+                        });
+                    }}
                   />
                   <label className="flex-fill ms-3" htmlFor={task._id}>
                     <strong className="fs-3">{task.name}</strong>
