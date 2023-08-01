@@ -107,7 +107,7 @@ export const appRouter = router({
       foundTask.note = note || foundTask.note;
       foundTask.completed = completed ?? foundTask.completed;
       foundTask.important = important ?? foundTask.important;
-      foundTask.groupId = groupId;
+      foundTask.groupId = groupId || foundTask.groupId;
 
       await foundTask.save();
 

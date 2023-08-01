@@ -42,8 +42,6 @@ export const TaskModal = ({
           task: {
             name: taskName,
             note: taskNote,
-            completed: false,
-            important: false,
             userId,
             groupId: normalizedGroupId,
           },
@@ -86,7 +84,7 @@ export const TaskModal = ({
         <div className="modal-content">
           <div className="modal-header">
             <h1 className="modal-title fs-2" id="addTaskModalLabel">
-              Add new task
+              {taskName && taskId ? "Update Task" : "Add new task"}
             </h1>
             <button
               type="button"
@@ -121,7 +119,8 @@ export const TaskModal = ({
             <br />
             <label htmlFor="taskGroup fw-bold">Task Group:</label>
             <br />
-            <select className="form-select"
+            <select
+              className="form-select"
               id="taskGroup"
               onChange={(e) => {
                 setGroupId(e.target.value);
