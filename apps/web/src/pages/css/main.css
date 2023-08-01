@@ -18,10 +18,16 @@
     background-color: #729ac3;
 }
 
+.page-content .modal .modal-body .form-select:focus {
+    border-color: #dee2e6;
+    box-shadow: none;
+}
+
 .page-content .modal .modal-body input{
     color: black;
     border-color: transparent;
     border-radius: 10px;
+    width: 100%;
 }
 
 .page-content .modal .modal-body input:focus-visible{
@@ -30,7 +36,7 @@
 
 .task-list{
     list-style: "none";
-    max-height: 61vh;
+    height: 60vh;
 }
 
 .delete-task-btn{
@@ -43,12 +49,62 @@
     border: none;
 }
 
-@media (max-width: 767px){
+.add-task-group-btn{
+    font-size: 15px !important;
+}
+
+.text-limit {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.modal {
+    --bs-modal-width: 24rem !important;
+}
+
+@media (max-width: 767.20px){
     .navbar-body-wrap{
         display: inherit !important;
     }
 
     .navbar-wrap{
+        width: calc(100% - 3rem);
         height: auto;
+        position: fixed;
+        z-index: 9999;
+        top: 1rem;
+    }
+
+    .page-content {
+        margin-top: 13vh;
+    }
+
+    .text-limit{
+        white-space: normal;
+    }
+}
+
+@media (min-width: 768px){
+    .group-task-item{
+        max-width: 6rem;
+    }
+}
+
+@media (min-width: 930px){
+    .group-task-item{
+        max-width: 9rem;
+    }
+}
+
+@media (min-width: 1200px){
+    .group-task-item{
+        max-width: 12rem;
+    }
+}
+
+@media (min-width: 1400px){
+    .group-task-item{
+        max-width: 15rem;
     }
 }

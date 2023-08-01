@@ -112,7 +112,7 @@ export const TaskModal = ({
             <br />
             <input
               id="taskNote"
-              className="bg-dark-subtle"
+              className="bg-dark-subtle mb-2"
               type="text"
               placeholder="answer 10 questions..."
               value={taskNote}
@@ -121,7 +121,7 @@ export const TaskModal = ({
             <br />
             <label htmlFor="taskGroup fw-bold">Task Group:</label>
             <br />
-            <select
+            <select className="form-select"
               id="taskGroup"
               onChange={(e) => {
                 setGroupId(e.target.value);
