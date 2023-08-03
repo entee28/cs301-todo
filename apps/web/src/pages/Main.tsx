@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { taskCompleted } from "../../node_modules/@reduxjs/toolkit/dist/listenerMiddleware/exceptions";
 import { TaskGroupModal, TaskModal } from "../components";
 import { useAppDispatch, useAppSelector } from "../libs/redux";
 import {
@@ -34,7 +35,9 @@ export const Main = () => {
   const [groupName, setGroupName] = useState("");
 
   const displayTasks = useMemo(() => {
-    if (!currentlySelectedGroup) return tasks;
+    if (!currentlySelectedGroup) return tasks; // nếu nó k thuộc group nào thì trả toàn bộ task
+
+    if(currentlySelectedGroup.name === 'Important') return tasks.filter((task) => task.important === true)
 
     return tasks.filter((task) => task.groupId === currentlySelectedGroup._id);
   }, [currentlySelectedGroup, tasks]);
@@ -112,6 +115,31 @@ export const Main = () => {
                       }}
                     >
                       <i className="fa-solid fa-list-check me-2"></i>All tasks
+                      <br/>
+                    </a>
+                  </li>
+                  <li className="nav-item">
+                    <a
+                      className={`nav-link ${
+                        currentlySelectedGroup?.name === "Important" && "active fw-bold"
+                      }`}
+                      aria-current="page"
+                      href="#"
+                      onClick={() => {
+                        dispatch(
+                          updateAppData({ 
+                            currentlySelectedGroup:{
+                              name: "Important",
+                              _id : 123,
+                              userId: "hello" || ""
+                            }
+                            
+                          })
+                        );
+                      }}
+                    >
+                      <i className="fa-solid fa-list-check me-2"></i>Important tasks
+                      <br/>
                     </a>
                   </li>
                   <h5 className="task mt-2">Group Task</h5>
@@ -207,7 +235,7 @@ export const Main = () => {
           </div>
         </div>
         {/* menu-sidebar end */}
-
+                  
         {/* page-content start */}
         <div className="page-content ps-4 pe-3 col-md-9">
           <div className="d-flex align-items-center justify-content-between">
@@ -216,6 +244,7 @@ export const Main = () => {
                 ? currentlySelectedGroup.name
                 : "All Task"}
             </h1>
+
             {currentlySelectedGroup && (
               <div className="p-3">
                 <button
@@ -275,8 +304,10 @@ export const Main = () => {
 
           <div className="task-list text-white overflow-y-auto">
             {displayTasks.map((task) => (
+              console.log(task),
+              
               <div className="task-wrap" key={task._id}>
-                <div className="d-flex">
+                <div className="d-flex">                                  
                   <input
                     className="task-checkbox"
                     type="checkbox"
@@ -306,6 +337,29 @@ export const Main = () => {
                       Note: "{task.note}"
                     </p>
                   </label>
+                  <div className="checkbox task-important">
+                    <input
+                      className="task-important me-3"
+                      type="checkbox"
+                      id={task._id}
+                      value={task._id}
+                      checked={task.important}
+                      onChange={() => {
+                        updateTask
+                          .mutateAsync({
+                            _id: task._id,
+                            task: {
+                              important: !task.important
+                            },
+
+                          })
+                          .then(() => {
+                            fetchedTasks.refetch();
+                          });
+                        
+                      }}
+                    />
+                  </div>
                   <div className="pe-3">
                     <div className="btn-group">
                       <button

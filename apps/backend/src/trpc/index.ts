@@ -103,6 +103,10 @@ export const appRouter = router({
         throw new Error("Invalid _id");
       }
 
+      if(foundTask.important === true){
+        foundTask.groupId === "123"
+      }
+
       foundTask.name = name || foundTask.name;
       foundTask.note = note || foundTask.note;
       foundTask.completed = completed ?? foundTask.completed;
@@ -196,6 +200,7 @@ export const appRouter = router({
         throw new Error("Invalid _id");
       }
 
+      
       foundGroup.name = name;
 
       await foundGroup.save();
